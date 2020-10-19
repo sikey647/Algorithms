@@ -1634,7 +1634,7 @@ int lengthOfLIS(vector<int>& nums) {
 //				整数数组nums从0到第i-1个元素中连续子数组最大和 与 
 //              0值 中的较大者 + nums[i]
 //				即：max_sum[i] = max(max_sum[i-1], 0) + a[i]
-// 状态数组：f[i] 为整数数组nums从0到第i个元素中连续子数组最大和
+// 状态数组：f[i] 为整数数组nums从0到第i个元素(必须包含第i个元素)中连续子数组最大和
 // DP方程：f[i] = max(f[i-1], 0) + a[i]
 int maxSubArray(vector<int>& nums) {
     vector<int> dp = nums;
@@ -1650,6 +1650,83 @@ int maxSubArray(vector<int>& nums) {
 ```
 
 #### [64. 最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/) (快手)
+
+```c++
+// 方法一：自顶向下（超时）
+// 重复性：坐标(i,j)的最小路径和 = 坐标(i+1,j)的最小路径和 与
+//          坐标(i,j+1)的最小路径和 的较小者 + 当前距离值
+int minPathSum(vector<vector<int>>& grid) {
+    if (grid.size() == 0) return 0;
+    return helper(0, 0, grid);
+}
+
+int helper(int i, int j, vector<vector<int>>& grid) {
+    if (i == grid.size() - 1 && j == grid[0].size() - 1) {
+        return grid[i][j];
+    } else if (i == grid.size() - 1) {
+        return helper(i, j + 1, grid) + grid[i][j];
+    } else if (j == grid[0].size() - 1) {
+        return helper(i + 1, j, grid) + grid[i][j];
+    } else {
+        return min(helper(i + 1, j, grid), helper(i, j + 1, grid)) +
+            grid[i][j];
+    }
+}
+
+// 方法二：自顶向下 + 记忆化
+int minPathSum(vector<vector<int>>& grid) {
+    if (grid.size() == 0) return 0;
+    vector<vector<int>> v(grid.size(), vector<int>(grid[0].size(), 0));
+    return helper(0, 0, grid, v);
+}
+
+int helper(int i, int j, vector<vector<int>>& grid,
+           vector<vector<int>>& v) {
+    if (v[i][j] == 0) {
+        if (i == grid.size() - 1 && j == grid[0].size() - 1) {
+            v[i][j] = grid[i][j];
+        } else if (i == grid.size() - 1) {
+            v[i][j] = helper(i, j + 1, grid, v) + grid[i][j];
+        } else if (j == grid[0].size() - 1) {
+            v[i][j] = helper(i + 1, j, grid, v) + grid[i][j];
+        } else {
+            v[i][j] =
+                min(helper(i + 1, j, grid, v), helper(i, j + 1, grid, v)) +
+                grid[i][j];
+        }
+    }
+    return v[i][j];
+}
+
+// 方法三：自底向上
+// 重复性：坐标(i,j)的最小路径和 = 坐标(i+1,j)的最小路径和 与
+//        坐标(i,j+1)的最小路径和 的较小者 + 当前距离值
+// 状态定义：dp[i][j]为坐标(i,j)到右下角(m,n)的最小路径和
+// dp方程：
+//  1、i和j都不是边界：dp[i][j] = min(dp[i+1][j], dp[i][j+1]) + grid[i][j]
+//  2、i是边界：dp[i][j] = dp[i][j+1] + grid[i][j]
+//  3、j是边界：dp[i][j] = dp[i+1][j] + grid[i][j]
+//  4、i和j都是边界：dp[i][j] = grid[i][j]
+int minPathSum(vector<vector<int>>& grid) {
+    if (grid.size() == 0) return 0;
+    int m = grid.size(), n = grid[0].size();
+    vector<vector<int>> dp(m, vector<int>(n, 0));
+    for (int i = m - 1; i >= 0; i--) {
+        for (int j = n - 1; j >= 0; j--) {
+            if (i == m - 1 && j == n - 1) {
+                dp[i][j] = grid[i][j];
+            } else if (i == m - 1) {
+                dp[i][j] = dp[i][j + 1] + grid[i][j];
+            } else if (j == n - 1) {
+                dp[i][j] = dp[i + 1][j] + grid[i][j];
+            } else {
+                dp[i][j] = min(dp[i + 1][j], dp[i][j + 1]) + grid[i][j];
+            }
+        }
+    }
+    return dp[0][0];
+}
+```
 
 #### [1027. 最长等差数列](https://leetcode-cn.com/problems/longest-arithmetic-sequence/) (快手)
 
@@ -1936,28 +2013,60 @@ int minimumTotal(vector<vector<int>>& triangle) {
 #### [198. 打家劫舍](https://leetcode-cn.com/problems/house-robber/) 【简单】
 
 ```c++
-// 重复性：偷窃第i间房子后最高金额 = 不偷窃第i间房子后最高金额 + 第i间房子藏有现金
-//        不偷窃第i间房子后最高金额 = 不偷窃第i间房子后最高金额 与 偷窃第i间房子后最高金额 中的较大者
-//        汇总，到第i间房子后最高金额 = 偷窃第i间房子后最高金额 与 不偷窃第i间房子后最高金额 中的较大者
-// 状态数组：f[i][0]为不偷窃第i间房子后最高金额
-//          f[i][1]为偷窃第i间房子后最高金额
-// DP方程：f[i][0] = max(f[i-1][0], f[i-1][1])
-//        f[i][1] = f[i-1][0] + nums[i]
+// 一、方法一：一维
+// 重复性：i个房子能够偷窃到的最高金额 =
+//          opt1: i-1个房子能够偷窃到的最高金额
+//              （第i个房子不偷）
+//          opt2: i-2个房子能够偷窃到的最高金额 + 第i个房子的金额
+//              （第i个房子偷）
+//      以上两者取较大者
+// 状态定义：dp[i] 为i个房子能够偷窃到的最高金额
+// DP方程：dp[i] = max(dp[i-1], dp[i-2] + nums[i])
 int rob(vector<int>& nums) {
-    if (nums.size() == 0)
-      	return 0;
+    if (nums.size() == 0) return 0;
 
-    int n = nums.size();
-    vector<vector<int>> dp(n, vector<int>(2));
+    if (nums.size() == 1) return nums[0];
+
+    vector<int> dp(nums.size(), 0);
+    dp[0] = nums[0];
+    dp[1] = max(nums[0], nums[1]);
+
+    for (int i = 2; i < nums.size(); i++) {
+        dp[i] = max(dp[i - 1], dp[i - 2] + nums[i]);
+    }
+
+    return dp[nums.size() - 1];
+}
+
+// 二、方法二：二维
+// 重复性：i个房子能够偷窃到的最高金额 =
+//          opt1:【第i个房子不偷时能够偷窃到的最高金额】
+//          opt2:【第i个房子偷时能够偷窃到的最高金额】
+//      以上两者取较大者
+//          【第i个房子偷时能够偷窃到的最高金额】 =
+//              【第i-1个房子不偷时能够偷窃到的最高金额】+ 【第i个房子金额】
+//          【第i个房子不偷时能够偷窃到的最高金额】=
+//              【第i-1个房子偷时能够偷窃到的最高金额】与
+//              【第i-1个房子不偷时能够偷窃到的最高金额】的较大者
+// 状态定义：dp[i][0] 为第i个房子不偷时能够偷窃到的最高金额
+//          dp[i][1] 为第i个房子偷时能够偷窃到的最高金额
+// DP方程：dp[i][0] = max(dp[i-1][0], dp[i-1][1])
+//          dp[i][1] = dp[i-i][0] + nums[i]
+int rob(vector<int>& nums) {
+    if (nums.size() == 0) return 0;
+
+    if (nums.size() == 1) return nums[0];
+
+    vector<vector<int>> dp(nums.size(), vector<int>(2, 0));
     dp[0][0] = 0;
     dp[0][1] = nums[0];
 
-    for (int i = 1; i < n; i++) {
-        dp[i][0] = max(dp[i-1][0], dp[i-1][1]);
-        dp[i][1] = dp[i-1][0] + nums[i];
+    for (int i = 1; i < nums.size(); i++) {
+        dp[i][0] = max(dp[i - 1][0], dp[i - 1][1]);
+        dp[i][1] = dp[i - 1][0] + nums[i];
     }
 
-    return max(dp[n-1][0], dp[n-1][1]);
+    return max(dp[nums.size() - 1][0], dp[nums.size() - 1][1]);
 }
 ```
 
