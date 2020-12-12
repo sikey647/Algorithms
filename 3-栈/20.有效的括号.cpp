@@ -4,20 +4,27 @@
  * [20] 有效的括号
  */
 
+// @lc code=start
+
 #include <stack>
 #include <string>
 #include <unordered_map>
-
 using namespace std;
 
-// @lc code=start
+// 思路：
+//  使用栈
+//  遍历字符串，字符为左括号，则入栈；
+//  如果字符为右括号，则与栈顶元素比较，如果匹配则出栈，则继续下一个字符
+//  当遍历完成后，如果栈为空，则说明为有效括号，如果非空，为无效括号
+
 class Solution {
    public:
     bool isValid(string s) {
         stack<char> charStack;
-        unordered_map<char, char> charMap{{')', '('}, {'}', '{'}, {']', '['}};
+        unordered_map<char, char> charMap = {
+            {')', '('}, {'}', '{'}, {']', '['}};
 
-        for (auto c : s) {
+        for (char c : s) {
             if (charMap.find(c) != charMap.end()) {
                 if (charStack.empty() || charMap[c] != charStack.top()) {
                     return false;
@@ -29,11 +36,7 @@ class Solution {
             }
         }
 
-        if (charStack.empty()) {
-            return true;
-        } else {
-            return false;
-        }
+        return charStack.empty();
     }
 };
 // @lc code=end
