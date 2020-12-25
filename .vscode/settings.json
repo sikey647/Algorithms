@@ -10,6 +10,7 @@
         "__mutex_base": "cpp",
         "memory": "cpp",
         "__config": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "stack": "cpp"
     }
 }
