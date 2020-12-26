@@ -12,5 +12,18 @@
         "__config": "cpp",
         "__nullptr": "cpp",
         "stack": "cpp"
-    }
+    },
+    "C_Cpp.default.cppStandard": "c++11",
+    "C_Cpp.default.cStandard": "c11",
+
+    "clang.cflags": [                           // 控制c语言静态检测的参数
+        "-std=c11",
+        "-Wall"
+    ],
+    "clang.cxxflags": [                         // 控制c++静态检测时的参数
+        "-std=c++11",
+        "-Wall"
+    ],
+    "clang.completion.enable": true,
+    "C_Cpp.default.intelliSenseMode": "clang-x64",
 }
