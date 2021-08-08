@@ -45,7 +45,7 @@ public:
             }
         }
 
-        // 在链表尾部插入新节点
+        // 在链表头部插入新节点
         m_list.push_front(make_pair(key, value));
         // 更新节点位置
         m_map[key] = m_list.begin();
