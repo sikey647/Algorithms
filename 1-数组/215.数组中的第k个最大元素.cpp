@@ -79,7 +79,7 @@ class Solution {
         int left = 0, right = nums.size() - 1;
 
         while (1) {
-            int index = partition(nums, left, right, target);
+            int index = partition(nums, left, right);
             if (index == target) {
                 return nums[target];
             } else if (index < target) {
@@ -90,7 +90,7 @@ class Solution {
         }
     }
 
-    int partition(vector<int>& nums, int left, int right, int target) {
+    int partition(vector<int>& nums, int left, int right) {
         int pivot = nums[left];
         int j = left;   // 记录小于pivot最后的位置
 
