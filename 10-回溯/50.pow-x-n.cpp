@@ -6,21 +6,29 @@
 
 // @lc code=start
 class Solution {
-   public:
+public:
+    // 递归
     double myPow(double x, long n) {
-        if (n == 0) return 1;
+        double res;
+
+        if (n == 0) {
+            return 1;
+        }
+
         if (n < 0) {
             x = 1 / x;
             n = -n;
         }
-        return _myPow(x, n);
-    }
 
-    double _myPow(double x, long n) {
-        if (n == 0) return 1;
         double half = myPow(x, n / 2);
+        if (n % 2 == 0) {   // 偶数
+            res = half * half;
+        } else {
+            res = half * half * x;
+        }
 
-        return (n % 2 == 0) ? half * half : half * half * x;
+        return res;
     }
 };
 // @lc code=end
+
